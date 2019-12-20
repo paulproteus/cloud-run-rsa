@@ -12,14 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const {execSync} = require('child_process');
+const {spawnSync} = require('child_process');
 const fs = require('fs');
 
 const express = require('express');
 const app = express();
 
 // Verify the utility is available at startup instead of waiting for a first request.
-fs.accessSync('/usr/local/bin/private-from-pq', fs.constants.X_OK);
+let binPath = './private-from-pq';
+try {
+  fs.accessSync(binPath, fs.constants.X_OK);
+} catch (err) {
+  binPath = '/usr/local/bin/private-from-pq';
+  fs.accessSync(binPath, fs.constants.X_OK);
+}
 
 app.get('/', (req, res) => {
   try {
@@ -31,6 +37,7 @@ app.get('/', (req, res) => {
   } catch (err) {
     console.error(`error: ${err.message}`);
     const errDetails = (err.stderr || err.message).toString();
+    res.setHeader('Content-Type', 'text/plain');
     res.status(400).send(`Bad Request: ${err.message}`);
   }
 });
@@ -42,7 +49,12 @@ const runPrivateFromPq = (p, q) => {
     throw new Error('syntax: missing p and/or q');
   }
 
-  return execSync(`/usr/local/bin/private-from-pq ${p} ${q}`)
+  const spawned = spawnSync(binPath, ["" + p, "" + q]);
+  if (spawned.status === 0) {
+    return spawned.stdout;
+  } else {
+    throw new Error(spawned.stderr.toString('utf-8'));
+  }
 };
 
 module.exports = app;
