@@ -14,7 +14,6 @@ RUN gcc private-from-pq.c -lssl -lcrypto -o /usr/local/bin/private-from-pq
 # A wildcard is used to ensure both package.json AND package-lock.json are copied.
 # Copying this separately prevents re-running npm install on every code change.
 COPY package*.json ./
-COPY private-from-pq ./
 
 # Install dependencies.
 # If you add a package-lock.json speed your build by switching to 'npm ci'.

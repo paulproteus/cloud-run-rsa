@@ -50,7 +50,7 @@ const runPrivateFromPq = (p, q) => {
   }
 
   const spawned = spawnSync(binPath, ["" + p, "" + q]);
-  if (spawned.status === 0) {
+  if (spawned.status === 0 && typeof spawned.stdout.length !== 'undefined') {
     return spawned.stdout;
   } else {
     throw new Error(spawned.stderr.toString('utf-8'));
